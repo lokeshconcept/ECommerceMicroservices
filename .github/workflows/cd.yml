@@ -1,0 +1,59 @@
+name: Deploy ECommerceMicroservices
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  deploy-product-api:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - run: dotnet publish ProductApi/ProductApi.csproj -c Release -o ./publish-product
+
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: product-api-lokesh
+          publish-profile: ${{ secrets.PRODUCT_API_PUBLISH_PROFILE }}
+          package: ./publish-product
+
+  deploy-order-api:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - run: dotnet publish OrderApi/OrderApi.csproj -c Release -o ./publish-order
+
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: order-api-lokesh
+          publish-profile: ${{ secrets.ORDER_API_PUBLISH_PROFILE }}
+          package: ./publish-order
+
+  deploy-order-worker:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - run: dotnet publish OrderWorker/OrderWorker.csproj -c Release -o ./publish-worker
+
+      - uses: Azure/functions-action@v1
+        with:
+          app-name: order-worker-lokesh
+          package: ./publish-worker
+          publish-profile: ${{ secrets.ORDER_WORKER_PUBLISH_PROFILE }}
