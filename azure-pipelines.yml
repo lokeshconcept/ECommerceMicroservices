@@ -1,34 +1,47 @@
 trigger:
-- main
+- master
 
 pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  buildConfiguration: 'Release'
+  azureSubscription: 'azure-service-connection'
+  acrName: 'lokeshacr2026'
+  acrLoginServer: 'lokeshacr2026.azurecr.io'
+  resourceGroup: 'rg-learning-dev'
+
+  productImage: 'productapi'
+  orderImage: 'orderapi'
+
+  productContainerApp: 'productapi-container'
+  orderContainerApp: 'orderapi-container'
+
+  imageTag: '$(Build.BuildId)'
 
 steps:
-- task: UseDotNet@2
+- checkout: self
+
+- task: AzureCLI@2
+  displayName: 'Build Push and Deploy Docker Images'
   inputs:
-    packageType: 'sdk'
-    version: '8.0.x'
+    azureSubscription: '$(azureSubscription)'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az acr login --name $(acrName)
 
-- script: dotnet restore ECommerceMicroservices.sln
-  displayName: 'Restore solution'
+      docker build -t $(acrLoginServer)/$(productImage):$(imageTag) ProductApi
+      docker push $(acrLoginServer)/$(productImage):$(imageTag)
 
-- script: dotnet build ECommerceMicroservices.sln --configuration $(buildConfiguration) --no-restore
-  displayName: 'Build solution'
+      docker build -t $(acrLoginServer)/$(orderImage):$(imageTag) OrderApi
+      docker push $(acrLoginServer)/$(orderImage):$(imageTag)
 
-- script: dotnet publish ProductApi/ProductApi.csproj -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/ProductApi
-  displayName: 'Publish ProductApi'
+      az containerapp update \
+        --name $(productContainerApp) \
+        --resource-group $(resourceGroup) \
+        --image $(acrLoginServer)/$(productImage):$(imageTag)
 
-- script: dotnet publish OrderApi/OrderApi.csproj -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/OrderApi
-  displayName: 'Publish OrderApi'
-
-- script: dotnet publish OrderWorker/OrderWorker.csproj -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/OrderWorker
-  displayName: 'Publish OrderWorker'
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
+      az containerapp update \
+        --name $(orderContainerApp) \
+        --resource-group $(resourceGroup) \
+        --image $(acrLoginServer)/$(orderImage):$(imageTag)
