@@ -1,0 +1,33 @@
+name: ECommerceMicroservices CI
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+    branches:
+      - master
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore solution
+        run: dotnet restore ECommerceMicroservices.sln
+
+      - name: Build solution
+        run: dotnet build ECommerceMicroservices.sln --configuration Release --no-restore
+
+      - name: Test solution
+        run: dotnet test ECommerceMicroservices.sln --configuration Release --no-build
