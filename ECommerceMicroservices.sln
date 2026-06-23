@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductApi", "ProductApi\ProductApi.csproj", "{780CB283-5517-4183-9455-402CB1E8C1B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderApi", "OrderApi\OrderApi.csproj", "{09EEDF88-3BEC-45FA-8663-F44196DFFC95}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{780CB283-5517-4183-9455-402CB1E8C1B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{780CB283-5517-4183-9455-402CB1E8C1B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{780CB283-5517-4183-9455-402CB1E8C1B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{780CB283-5517-4183-9455-402CB1E8C1B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09EEDF88-3BEC-45FA-8663-F44196DFFC95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09EEDF88-3BEC-45FA-8663-F44196DFFC95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09EEDF88-3BEC-45FA-8663-F44196DFFC95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09EEDF88-3BEC-45FA-8663-F44196DFFC95}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

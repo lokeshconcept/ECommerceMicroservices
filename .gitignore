@@ -1,0 +1,83 @@
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio files
+.vs/
+.vscode/
+
+# Rider
+.idea/
+
+# ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# NuGet
+packages/
+*.nupkg
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Azure Functions local settings (contains secrets)
+local.settings.json
+
+# App settings containing secrets
+appsettings.Development.json
+
+# Secrets
+secrets.json
+
+# Publish output
+publish/
+
+# Test Results
+TestResults/
+
+# Azure Functions generated files
+**/bin/
+**/obj/
+
+# Node modules (if React/Angular frontend is inside same repo)
+node_modules/
+
+# Environment files
+.env
+.env.*
+
+# Docker override files
+docker-compose.override.yml
+
+# Application Insights local config
+ApplicationInsights.config
+
+# Azure artifacts
+artifacts/
+
+# Coverage reports
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+
+# JetBrains Rider
+.idea/
+
+# Visual Studio Code settings (optional)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json

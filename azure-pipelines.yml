@@ -1,0 +1,34 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '8.0.x'
+
+- script: dotnet restore ECommerceMicroservices.sln
+  displayName: 'Restore solution'
+
+- script: dotnet build ECommerceMicroservices.sln --configuration $(buildConfiguration) --no-restore
+  displayName: 'Build solution'
+
+- script: dotnet publish ProductApi/ProductApi.csproj -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/ProductApi
+  displayName: 'Publish ProductApi'
+
+- script: dotnet publish OrderApi/OrderApi.csproj -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/OrderApi
+  displayName: 'Publish OrderApi'
+
+- script: dotnet publish OrderWorker/OrderWorker.csproj -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/OrderWorker
+  displayName: 'Publish OrderWorker'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
