@@ -17,6 +17,7 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 app.MapGet("/health", () => "OrderApi is running from Azure DevOps pipeline");
+app.MapGet("/healthTow", () => "OrderApi is running from Azure DevOps pipeline two");
 app.UseAuthentication();
 app.UseAuthorization();
 
