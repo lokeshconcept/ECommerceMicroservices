@@ -5,8 +5,22 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:5173",
+                "https://your-frontend-url.com"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
+app.UseCors("AllowReactApp");
 
 // Configure the HTTP request pipeline.
 // if (app.Environment.IsDevelopment())
@@ -16,8 +30,6 @@ var app = builder.Build();
 //}
 
 app.UseHttpsRedirection();
-app.MapGet("/health", () => "OrderApi is running from Azure DevOps pipeline");
-app.MapGet("/healthTow", () => "OrderApi is running from Azure DevOps pipeline two");
 app.UseAuthentication();
 app.UseAuthorization();
 

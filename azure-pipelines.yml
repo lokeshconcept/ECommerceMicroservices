@@ -12,9 +12,11 @@ variables:
 
   productImage: 'productapi'
   orderImage: 'orderapi'
+  frontendImage: 'ecommerce-ui'
 
   productContainerApp: 'productapi-container'
   orderContainerApp: 'orderapi-container'
+  frontendContainerApp: 'ecommerce-ui-container'
 
   imageTag: '$(Build.BuildId)'
 
@@ -36,6 +38,9 @@ steps:
       docker build -t $(acrLoginServer)/$(orderImage):$(imageTag) OrderApi
       docker push $(acrLoginServer)/$(orderImage):$(imageTag)
 
+      docker build -t $(acrLoginServer)/$(frontendImage):$(imageTag) ecommerce-ui
+      docker push $(acrLoginServer)/$(frontendImage):$(imageTag)
+
       az containerapp update \
         --name $(productContainerApp) \
         --resource-group $(resourceGroup) \
@@ -45,3 +50,8 @@ steps:
         --name $(orderContainerApp) \
         --resource-group $(resourceGroup) \
         --image $(acrLoginServer)/$(orderImage):$(imageTag)
+
+      az containerapp update \
+        --name $(frontendContainerApp) \
+        --resource-group $(resourceGroup) \
+        --image $(acrLoginServer)/$(frontendImage):$(imageTag)

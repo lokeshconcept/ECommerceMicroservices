@@ -1,5 +1,6 @@
 using Azure.Messaging.ServiceBus;
 using Microsoft.AspNetCore.Mvc;
+using OrderApi.Models;
 using System.Text.Json;
 
 namespace OrderApi.Controllers;
@@ -16,24 +17,37 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateOrder()
+    public async Task<IActionResult> CreateOrder(
+        [FromBody] CreateOrderRequest request)
     {
-        var connectionString = _configuration["ServiceBus:ConnectionString"];
-        var queueName = _configuration["ServiceBus:QueueName"];
+        if (request == null)
+            return BadRequest();
+
+        var connectionString =
+            _configuration["ServiceBus:ConnectionString"];
+
+        var queueName =
+            _configuration["ServiceBus:QueueName"];
 
         var order = new
         {
             OrderId = Guid.NewGuid(),
-            ProductId = 1,
-            Quantity = 2,
+            ProductId = request.ProductId,
+            Quantity = request.Quantity,
             CreatedAt = DateTime.UtcNow
         };
 
-        await using var client = new ServiceBusClient(connectionString);
-        ServiceBusSender sender = client.CreateSender(queueName);
+        await using var client =
+            new ServiceBusClient(connectionString);
 
-        string messageBody = JsonSerializer.Serialize(order);
-        await sender.SendMessageAsync(new ServiceBusMessage(messageBody));
+        ServiceBusSender sender =
+            client.CreateSender(queueName);
+
+        string messageBody =
+            JsonSerializer.Serialize(order);
+
+        await sender.SendMessageAsync(
+            new ServiceBusMessage(messageBody));
 
         return Ok(new
         {
