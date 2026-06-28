@@ -41,17 +41,8 @@ steps:
       docker build -t $(acrLoginServer)/$(frontendImage):$(imageTag) ecommerce-ui
       docker push $(acrLoginServer)/$(frontendImage):$(imageTag)
 
-      az containerapp update \
-        --name $(productContainerApp) \
-        --resource-group $(resourceGroup) \
-        --image $(acrLoginServer)/$(productImage):$(imageTag)
+      az containerapp update --name $(productContainerApp) --resource-group $(resourceGroup) --image $(acrLoginServer)/$(productImage):$(imageTag)
 
-      az containerapp update \
-        --name $(orderContainerApp) \
-        --resource-group $(resourceGroup) \
-        --image $(acrLoginServer)/$(orderImage):$(imageTag)
+      az containerapp update --name $(orderContainerApp) --resource-group $(resourceGroup) --image $(acrLoginServer)/$(orderImage):$(imageTag)
 
-      az containerapp update \
-        --name $(frontendContainerApp) \
-        --resource-group $(resourceGroup) \
-        --image $(acrLoginServer)/$(frontendImage):$(imageTag)
+      az containerapp update --name $(frontendContainerApp) --resource-group $(resourceGroup) --image $(acrLoginServer)/$(frontendImage):$(imageTag)
