@@ -17,17 +17,10 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateOrder(
-        [FromBody] CreateOrderRequest request)
+    public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
     {
-        if (request == null)
-            return BadRequest();
-
-        var connectionString =
-            _configuration["ServiceBus:ConnectionString"];
-
-        var queueName =
-            _configuration["ServiceBus:QueueName"];
+        var connectionString = _configuration["ServiceBus:ConnectionString"];
+        var queueName = _configuration["ServiceBus:QueueName"];
 
         var order = new
         {
@@ -37,17 +30,20 @@ public class OrdersController : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
 
-        await using var client =
-            new ServiceBusClient(connectionString);
+        await using var client = new ServiceBusClient(connectionString, new ServiceBusClientOptions
+        {
+            RetryOptions = new ServiceBusRetryOptions
+            {
+                TryTimeout = TimeSpan.FromSeconds(10),
+                MaxRetries = 1
+            }
+        });
 
-        ServiceBusSender sender =
-            client.CreateSender(queueName);
+        var sender = client.CreateSender(queueName);
 
-        string messageBody =
-            JsonSerializer.Serialize(order);
+        var messageBody = JsonSerializer.Serialize(order);
 
-        await sender.SendMessageAsync(
-            new ServiceBusMessage(messageBody));
+        await sender.SendMessageAsync(new ServiceBusMessage(messageBody));
 
         return Ok(new
         {
