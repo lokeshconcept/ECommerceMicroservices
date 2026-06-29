@@ -12,7 +12,8 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(
                 "http://localhost:5173",
-                "https://your-frontend-url.com"
+                "http://localhost:3000",
+                "https://ecommerce-ui-container.thankfulsea-e12695bb.centralindia.azurecontainerapps.io"
             )
             .AllowAnyHeader()
             .AllowAnyMethod();
