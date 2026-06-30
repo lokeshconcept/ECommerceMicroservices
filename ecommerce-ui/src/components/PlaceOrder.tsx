@@ -11,7 +11,7 @@ export default function PlaceOrder() {
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    console.log("API URL:", import.meta.env.VITE_ORDER_API_BASE_URL);
     try {
       setLoading(true);
       setError("");
@@ -32,7 +32,7 @@ export default function PlaceOrder() {
 
   return (
     <div style={{ maxWidth: 400, margin: "40px auto" }}>
-      <h2>Place Order</h2>
+      <h2>Place Order CD Test</h2>
 
       <form onSubmit={handlePlaceOrder}>
         <div>
