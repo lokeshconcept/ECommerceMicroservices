@@ -13,6 +13,8 @@ builder.Services.AddCors(options =>
             .WithOrigins(
                 "http://localhost:5173",
                 "http://localhost:3000",
+                 "http://135.235.150.67", // AKS UI URL
+                "http://localhost:5173", // React local development
                 "https://ecommerce-ui-container.thankfulsea-e12695bb.centralindia.azurecontainerapps.io"
             )
             .AllowAnyHeader()
