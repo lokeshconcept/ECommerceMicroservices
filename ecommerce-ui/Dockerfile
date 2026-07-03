@@ -7,6 +7,9 @@ RUN npm install
 
 COPY . .
 
+ARG VITE_ORDER_API_BASE_URL
+ENV VITE_ORDER_API_BASE_URL=$VITE_ORDER_API_BASE_URL
+
 RUN npm run build
 
 FROM nginx:alpine
