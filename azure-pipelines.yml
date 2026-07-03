@@ -20,7 +20,6 @@ stages:
   - job: BuildPush
     steps:
     - task: AzureCLI@2
-      displayName: Build and Push Docker Images
       inputs:
         azureSubscription: $(azureSubscription)
         scriptType: bash
@@ -37,6 +36,7 @@ stages:
           docker build \
             --build-arg VITE_ORDER_API_BASE_URL=http://135.235.150.67/order \
             -t $(acrLoginServer)/ecommerce-ui:$(imageTag) ./ecommerce-ui
+
           docker push $(acrLoginServer)/ecommerce-ui:$(imageTag)
 
 - stage: CD
@@ -46,7 +46,6 @@ stages:
   - job: Deploy
     steps:
     - task: AzureCLI@2
-      displayName: Deploy Images to AKS
       inputs:
         azureSubscription: $(azureSubscription)
         scriptType: bash
@@ -58,8 +57,11 @@ stages:
             --overwrite-existing
 
           kubectl apply -f k8s/namespace.yml
+          kubectl apply -f k8s/productapi-deployment.yml
           kubectl apply -f k8s/productapi-service.yml
+          kubectl apply -f k8s/orderapi-deployment.yml
           kubectl apply -f k8s/orderapi-service.yml
+          kubectl apply -f k8s/ecommerce-ui-deployment.yml
           kubectl apply -f k8s/ecommerce-ui-service.yml
           kubectl apply -f k8s/ingress.yml
 
