@@ -32,7 +32,7 @@ export default function PlaceOrder() {
 
   return (
     <div style={{ maxWidth: 400, margin: "40px auto" }}>
-      <h2>Place Order CD Test</h2>
+      <h2>Place Order AKS CD test</h2>
 
       <form onSubmit={handlePlaceOrder}>
         <div>

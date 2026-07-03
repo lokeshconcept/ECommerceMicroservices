@@ -2,47 +2,79 @@ trigger:
 - master
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: ubuntu-latest
 
 variables:
   azureSubscription: 'azure-service-connection'
   acrName: 'lokeshacr2026'
   acrLoginServer: 'lokeshacr2026.azurecr.io'
   resourceGroup: 'rg-learning-dev'
-
-  productImage: 'productapi'
-  orderImage: 'orderapi'
-  frontendImage: 'ecommerce-ui'
-
-  productContainerApp: 'productapi-container'
-  orderContainerApp: 'orderapi-container'
-  frontendContainerApp: 'ecommerce-ui-container'
-
+  aksCluster: 'ecommerce-aks'
+  namespace: 'ecommerce'
   imageTag: '$(Build.BuildId)'
 
-steps:
-- checkout: self
+stages:
+- stage: CI
+  displayName: Build and Push Images
+  jobs:
+  - job: BuildPush
+    steps:
+    - task: AzureCLI@2
+      displayName: Build and Push Docker Images
+      inputs:
+        azureSubscription: $(azureSubscription)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az acr login --name $(acrName)
 
-- task: AzureCLI@2
-  displayName: 'Build Push and Deploy Docker Images'
-  inputs:
-    azureSubscription: '$(azureSubscription)'
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      az acr login --name $(acrName)
+          docker build -t $(acrLoginServer)/productapi:$(imageTag) ./ProductApi
+          docker push $(acrLoginServer)/productapi:$(imageTag)
 
-      docker build -t $(acrLoginServer)/$(productImage):$(imageTag) ProductApi
-      docker push $(acrLoginServer)/$(productImage):$(imageTag)
+          docker build -t $(acrLoginServer)/orderapi:$(imageTag) ./OrderApi
+          docker push $(acrLoginServer)/orderapi:$(imageTag)
 
-      docker build -t $(acrLoginServer)/$(orderImage):$(imageTag) OrderApi
-      docker push $(acrLoginServer)/$(orderImage):$(imageTag)
+          docker build \
+            --build-arg VITE_ORDER_API_BASE_URL=http://135.235.150.67/order \
+            -t $(acrLoginServer)/ecommerce-ui:$(imageTag) ./ecommerce-ui
+          docker push $(acrLoginServer)/ecommerce-ui:$(imageTag)
 
-      docker build -t $(acrLoginServer)/$(frontendImage):$(imageTag) ecommerce-ui
-      docker push $(acrLoginServer)/$(frontendImage):$(imageTag)
+- stage: CD
+  displayName: Deploy to AKS
+  dependsOn: CI
+  jobs:
+  - job: Deploy
+    steps:
+    - task: AzureCLI@2
+      displayName: Deploy Images to AKS
+      inputs:
+        azureSubscription: $(azureSubscription)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az aks get-credentials \
+            --resource-group $(resourceGroup) \
+            --name $(aksCluster) \
+            --overwrite-existing
 
-      az containerapp update --name $(productContainerApp) --resource-group $(resourceGroup) --image $(acrLoginServer)/$(productImage):$(imageTag)
+          kubectl apply -f k8s/namespace.yml
+          kubectl apply -f k8s/productapi-service.yml
+          kubectl apply -f k8s/orderapi-service.yml
+          kubectl apply -f k8s/ecommerce-ui-service.yml
+          kubectl apply -f k8s/ingress.yml
 
-      az containerapp update --name $(orderContainerApp) --resource-group $(resourceGroup) --image $(acrLoginServer)/$(orderImage):$(imageTag)
+          kubectl set image deployment/productapi-deployment \
+            productapi=$(acrLoginServer)/productapi:$(imageTag) \
+            -n $(namespace)
 
-      az containerapp update --name $(frontendContainerApp) --resource-group $(resourceGroup) --image $(acrLoginServer)/$(frontendImage):$(imageTag)
+          kubectl set image deployment/orderapi-deployment \
+            orderapi=$(acrLoginServer)/orderapi:$(imageTag) \
+            -n $(namespace)
+
+          kubectl set image deployment/ecommerce-ui-deployment \
+            ecommerce-ui=$(acrLoginServer)/ecommerce-ui:$(imageTag) \
+            -n $(namespace)
+
+          kubectl rollout status deployment/productapi-deployment -n $(namespace)
+          kubectl rollout status deployment/orderapi-deployment -n $(namespace)
+          kubectl rollout status deployment/ecommerce-ui-deployment -n $(namespace)

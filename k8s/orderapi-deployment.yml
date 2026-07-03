@@ -15,6 +15,17 @@ spec:
     spec:
       containers:
       - name: orderapi
-        image: lokeshacr2026.azurecr.io/orderapi:latest
+        image: lokeshacr2026.azurecr.io/orderapi:11
         ports:
         - containerPort: 8080
+        env:
+        - name: ServiceBus__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: orderapi-secrets
+              key: ServiceBus__ConnectionString
+        - name: ServiceBus__QueueName
+          valueFrom:
+            secretKeyRef:
+              name: orderapi-secrets
+              key: ServiceBus__QueueName
