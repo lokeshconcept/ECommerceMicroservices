@@ -1,10 +1,11 @@
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddControllers();
-// Azure DevOps auto deployment practice
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddHealthChecks();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
@@ -13,8 +14,7 @@ builder.Services.AddCors(options =>
             .WithOrigins(
                 "http://localhost:5173",
                 "http://localhost:3000",
-                 "http://135.235.150.67", // AKS UI URL
-                "http://localhost:5173", // React local development
+                "http://135.235.150.67",
                 "https://ecommerce-ui-container.thankfulsea-e12695bb.centralindia.azurecontainerapps.io"
             )
             .AllowAnyHeader()
@@ -23,24 +23,15 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
 app.UseCors("AllowReactApp");
 
-// Configure the HTTP request pipeline.
-// if (app.Environment.IsDevelopment())
-// {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-//}
+app.UseSwagger();
+app.UseSwaggerUI();
 
-//app.UseHttpsRedirection();
-//app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHealthChecks("/health");
 app.MapControllers();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

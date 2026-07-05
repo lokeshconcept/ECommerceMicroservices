@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ecommerce-config
+  namespace: ecommerce
+data:
+  ASPNETCORE_ENVIRONMENT: "Production"
+  Logging__LogLevel__Default: "Information"
+
+  ProductApi__BaseUrl: "http://productapi-service:8080"
+  OrderApi__BaseUrl: "http://orderapi-service:8080"
+
+  ServiceBus__QueueName: "orders"

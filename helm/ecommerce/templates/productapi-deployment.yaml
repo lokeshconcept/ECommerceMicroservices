@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: productapi-deployment
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.productapi.replicas }}
+  selector:
+    matchLabels:
+      app: productapi
+  template:
+    metadata:
+      labels:
+        app: productapi
+    spec:
+      containers:
+      - name: productapi
+        image: "{{ .Values.image.registry }}/{{ .Values.productapi.image }}:{{ .Values.productapi.tag }}"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: {{ .Values.productapi.port }}
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.productapi.port }}
+          initialDelaySeconds: 10
+          periodSeconds: 10
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.productapi.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 10

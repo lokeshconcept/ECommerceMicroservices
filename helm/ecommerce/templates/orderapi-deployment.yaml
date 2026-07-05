@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: orderapi-deployment
+  namespace: {{ .Values.namespace }}
+
+spec:
+  replicas: {{ .Values.orderapi.replicas }}
+
+  selector:
+    matchLabels:
+      app: orderapi
+
+  template:
+    metadata:
+      labels:
+        app: orderapi
+
+    spec:
+      containers:
+        - name: orderapi
+
+          image: "{{ .Values.image.registry }}/{{ .Values.orderapi.image }}:{{ .Values.orderapi.tag }}"
+
+          ports:
+            - containerPort: {{ .Values.orderapi.port }}
+
+          env:
+
+            - name: ServiceBus__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: orderapi-secrets
+                  key: ServiceBus__ConnectionString
+
+            - name: ServiceBus__QueueName
+              valueFrom:
+                secretKeyRef:
+                  name: orderapi-secrets
+                  key: ServiceBus__QueueName
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.orderapi.port }}
+
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.orderapi.port }}
+
+            initialDelaySeconds: 30
+            periodSeconds: 10

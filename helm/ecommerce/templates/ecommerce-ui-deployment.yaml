@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: ecommerce-ui-deployment
+  namespace: {{ .Values.namespace }}
+
+spec:
+  replicas: {{ .Values.ui.replicas }}
+
+  selector:
+    matchLabels:
+      app: ecommerce-ui
+
+  template:
+    metadata:
+      labels:
+        app: ecommerce-ui
+
+    spec:
+      containers:
+
+        - name: ecommerce-ui
+
+          image: "{{ .Values.image.registry }}/{{ .Values.ui.image }}:{{ .Values.ui.tag }}"
+
+          ports:
+            - containerPort: {{ .Values.ui.port }}
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.ui.port }}
+
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.ui.port }}
+
+            initialDelaySeconds: 30
+            periodSeconds: 10

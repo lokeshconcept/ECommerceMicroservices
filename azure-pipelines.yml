@@ -12,6 +12,8 @@ variables:
   aksCluster: 'ecommerce-aks'
   namespace: 'ecommerce'
   imageTag: '$(Build.BuildId)'
+  helmRelease: 'ecommerce'
+  helmChartPath: './helm/ecommerce'
 
 stages:
 - stage: CI
@@ -20,6 +22,7 @@ stages:
   - job: BuildPush
     steps:
     - task: AzureCLI@2
+      displayName: Build and Push Docker Images
       inputs:
         azureSubscription: $(azureSubscription)
         scriptType: bash
@@ -34,18 +37,19 @@ stages:
           docker push $(acrLoginServer)/orderapi:$(imageTag)
 
           docker build \
-            --build-arg VITE_ORDER_API_BASE_URL=http://135.235.150.67/order \
+            --build-arg VITE_ORDER_API_BASE_URL=http://135.235.150.67/api/orders \
             -t $(acrLoginServer)/ecommerce-ui:$(imageTag) ./ecommerce-ui
 
           docker push $(acrLoginServer)/ecommerce-ui:$(imageTag)
 
 - stage: CD
-  displayName: Deploy to AKS
+  displayName: Deploy to AKS using Helm
   dependsOn: CI
   jobs:
   - job: Deploy
     steps:
     - task: AzureCLI@2
+      displayName: Helm Upgrade to AKS
       inputs:
         azureSubscription: $(azureSubscription)
         scriptType: bash
@@ -56,27 +60,17 @@ stages:
             --name $(aksCluster) \
             --overwrite-existing
 
-          kubectl apply -f k8s/namespace.yml
-          kubectl apply -f k8s/productapi-deployment.yml
-          kubectl apply -f k8s/productapi-service.yml
-          kubectl apply -f k8s/orderapi-deployment.yml
-          kubectl apply -f k8s/orderapi-service.yml
-          kubectl apply -f k8s/ecommerce-ui-deployment.yml
-          kubectl apply -f k8s/ecommerce-ui-service.yml
-          kubectl apply -f k8s/ingress.yml
-
-          kubectl set image deployment/productapi-deployment \
-            productapi=$(acrLoginServer)/productapi:$(imageTag) \
-            -n $(namespace)
-
-          kubectl set image deployment/orderapi-deployment \
-            orderapi=$(acrLoginServer)/orderapi:$(imageTag) \
-            -n $(namespace)
-
-          kubectl set image deployment/ecommerce-ui-deployment \
-            ecommerce-ui=$(acrLoginServer)/ecommerce-ui:$(imageTag) \
-            -n $(namespace)
+          helm upgrade --install $(helmRelease) $(helmChartPath) \
+            --namespace $(namespace) \
+            --create-namespace \
+            --set productapi.tag=$(imageTag) \
+            --set orderapi.tag=$(imageTag) \
+            --set ui.tag=$(imageTag)
 
           kubectl rollout status deployment/productapi-deployment -n $(namespace)
           kubectl rollout status deployment/orderapi-deployment -n $(namespace)
           kubectl rollout status deployment/ecommerce-ui-deployment -n $(namespace)
+
+          kubectl get pods -n $(namespace)
+          kubectl get svc -n $(namespace)
+          kubectl get ingress -n $(namespace)

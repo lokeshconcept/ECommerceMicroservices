@@ -1,0 +1,30 @@
+namespace: ecommerce
+
+image:
+  registry: lokeshacr2026.azurecr.io
+
+productapi:
+  name: productapi
+  image: productapi
+  tag: "15"
+  replicas: 2
+  port: 8080
+
+orderapi:
+  name: orderapi
+  image: orderapi
+  tag: "16"
+  replicas: 2
+  port: 8080
+
+ui:
+  name: ecommerce-ui
+  image: ecommerce-ui
+  tag: "15"
+  replicas: 2
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  host: ""

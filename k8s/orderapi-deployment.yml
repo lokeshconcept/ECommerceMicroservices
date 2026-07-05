@@ -1,31 +1,73 @@
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   name: orderapi-deployment
   namespace: ecommerce
+
 spec:
   replicas: 2
+
   selector:
     matchLabels:
       app: orderapi
+
   template:
     metadata:
       labels:
         app: orderapi
+
     spec:
       containers:
       - name: orderapi
-        image: lokeshacr2026.azurecr.io/orderapi:11
+        image: lokeshacr2026.azurecr.io/orderapi:16
+
         ports:
         - containerPort: 8080
+
         env:
+        # ConfigMap
+        - name: ASPNETCORE_ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: ecommerce-config
+              key: ASPNETCORE_ENVIRONMENT
+
+        - name: ServiceBus__QueueName
+          valueFrom:
+            configMapKeyRef:
+              name: ecommerce-config
+              key: ServiceBus__QueueName
+
+        # Secret
         - name: ServiceBus__ConnectionString
           valueFrom:
             secretKeyRef:
               name: orderapi-secrets
               key: ServiceBus__ConnectionString
-        - name: ServiceBus__QueueName
-          valueFrom:
-            secretKeyRef:
-              name: orderapi-secrets
-              key: ServiceBus__QueueName
+
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 3
