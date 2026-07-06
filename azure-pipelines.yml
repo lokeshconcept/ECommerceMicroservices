@@ -37,7 +37,7 @@ stages:
           docker push $(acrLoginServer)/orderapi:$(imageTag)
 
           docker build \
-            --build-arg VITE_ORDER_API_BASE_URL=http://135.235.150.67/api/orders \
+            --build-arg VITE_ORDER_API_BASE_URL=http://135.235.150.67 \
             -t $(acrLoginServer)/ecommerce-ui:$(imageTag) ./ecommerce-ui
 
           docker push $(acrLoginServer)/ecommerce-ui:$(imageTag)
