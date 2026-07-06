@@ -1,5 +1,3 @@
-{{- if .Values.ingress.enabled }}
-
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 
@@ -7,53 +5,32 @@ metadata:
   name: ecommerce-ingress
   namespace: {{ .Values.namespace }}
 
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-
 spec:
-
   ingressClassName: {{ .Values.ingress.className }}
 
   rules:
-
     - http:
-
         paths:
-
           - path: /api/products
             pathType: Prefix
-
             backend:
-
               service:
-
                 name: productapi-service
-
                 port:
                   number: 80
 
           - path: /api/orders
             pathType: Prefix
-
             backend:
-
               service:
-
                 name: orderapi-service
-
                 port:
                   number: 80
 
           - path: /
             pathType: Prefix
-
             backend:
-
               service:
-
                 name: ecommerce-ui-service
-
                 port:
                   number: 80
-
-{{- end }}
